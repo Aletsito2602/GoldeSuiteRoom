@@ -1,0 +1,348 @@
+/* src/pages/LoginPage.css */
+
+.login-page-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #1a1a1a; /* Fondo oscuro general */
+  color: #ffffff;
+}
+
+.login-left-column {
+  flex: 1;
+  background: linear-gradient(145deg, #6a0dad, #a020f0, #4b0082); /* Gradiente morado similar */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.left-content {
+  max-width: 400px;
+}
+
+.logo-placeholder {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  /* Estilo para el logo circular como en la imagen */
+  width: 60px;
+  height: 60px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: inline-flex; /* Cambiado a inline-flex */
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px; /* Separación del título */
+}
+
+.left-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.left-content p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 40px;
+}
+
+.steps-placeholder .step {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.steps-placeholder .step.active {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.steps-placeholder .step span {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-flex; /* Usar flex para centrar */
+  justify-content: center;
+  align-items: center;
+  margin-right: 15px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.steps-placeholder .step.active span {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+
+.login-right-column {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  background-color: #111111; /* Fondo ligeramente diferente para la columna derecha */
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 450px;
+  background-color: #1f1f1f; /* Fondo del contenedor del formulario */
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.login-form-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.login-form-container p {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.social-login-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.social-button {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #444;
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-button:hover {
+  background-color: #3a3a3a;
+}
+
+/* Añadir íconos reales sería mejor */
+.social-button.google::before {
+ content: 'G'; /* Placeholder */
+ font-weight: bold;
+}
+.social-button.github::before {
+ content: 'GH'; /* Placeholder */
+ font-weight: bold;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #666;
+  margin: 25px 0;
+  font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #444;
+}
+
+.divider span {
+  padding: 0 10px;
+}
+
+.name-inputs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.name-inputs .input-group {
+    flex: 1;
+    margin-bottom: 0; /* Reset margin since it's handled by gap */
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  margin-bottom: 8px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #2d2d2d;
+  border: 1px solid #444;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box; /* Asegura que el padding no aumente el tamaño total */
+}
+
+.input-group input::placeholder {
+  color: #666;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #a020f0; /* Color de borde al enfocar */
+  box-shadow: 0 0 0 2px rgba(160, 32, 240, 0.3);
+}
+
+.password-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 5px;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 14px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: 10px; /* Espacio antes del botón */
+}
+
+.submit-button:hover {
+  background-color: #f0f0f0;
+}
+
+.toggle-mode {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: #a0a0a0;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: #d7b615; /* Dorado como el tema general */
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 5px;
+  padding: 0;
+}
+
+.toggle-button:hover {
+  text-decoration: underline;
+}
+
+/* Estilos para los nuevos botones toggle de formulario */
+.form-toggle-buttons {
+  display: flex;
+  gap: 10px; /* Espacio entre botones */
+  margin-bottom: 25px; /* Espacio antes del divisor */
+  border: 1px solid #444; /* Borde contenedor opcional */
+  border-radius: 6px; /* Redondeado contenedor opcional */
+  overflow: hidden; /* Para que el borde redondeado funcione bien */
+}
+
+.toggle-form-button {
+  flex: 1; /* Ocupa el espacio disponible */
+  padding: 12px;
+  border: none; /* Sin borde individual */
+  background-color: #2a2a2a; /* Fondo inactivo */
+  color: #a0a0a0; /* Color texto inactivo */
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-align: center;
+}
+
+.toggle-form-button.active {
+  background-color: #444; /* Fondo activo */
+  color: #ffffff; /* Color texto activo */
+  font-weight: bold;
+}
+
+.toggle-form-button:hover:not(.active) {
+  background-color: #3a3a3a;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+  .login-page-container {
+    flex-direction: column;
+  }
+
+  .login-left-column {
+     min-height: 40vh; /* Altura mínima en móvil */
+     flex: none; /* Quita el flex grow */
+     justify-content: flex-start; /* Alinea arriba */
+     padding-top: 60px; /* Más espacio arriba */
+  }
+
+  .left-content h2 {
+    font-size: 2rem;
+  }
+  .left-content p {
+    font-size: 0.9rem;
+  }
+  .steps-placeholder {
+      display: none; /* Ocultar pasos en móvil */
+  }
+
+  .login-right-column {
+    flex: none;
+    padding: 30px 20px; /* Menos padding */
+  }
+
+  .login-form-container {
+    padding: 30px;
+    max-width: none; /* Ocupa el ancho disponible */
+    box-shadow: none;
+    background-color: transparent; /* Fondo transparente en móvil */
+  }
+}
+
+@media (max-width: 480px) {
+    .social-login-buttons {
+        flex-direction: column;
+    }
+    .name-inputs {
+        flex-direction: column;
+        gap: 15px; /* Ajusta el gap si es necesario */
+    }
+} 
