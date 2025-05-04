@@ -4,38 +4,64 @@
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #1a1a1a; /* Fondo oscuro general */
+  /* Eliminar imagen de fondo del contenedor principal */
+  /* background-image: url('/images/fondo-login.png'); */
+  /* background-size: cover; */
+  /* background-position: center; */
+  /* background-repeat: no-repeat; */
+  /* Poner un color de fondo base */
+  background-color: #111111;
   color: #ffffff;
 }
 
 .login-left-column {
   flex: 1;
-  background: linear-gradient(145deg, #6a0dad, #a020f0, #4b0082); /* Gradiente morado similar */
+  /* Eliminar gradiente */
+  /* background: linear-gradient(145deg, rgba(106, 13, 173, 0.8), rgba(75, 0, 130, 0.8)); */
+  /* Aplicar imagen de fondo aquí */
+  background-image: url('/images/isaac-fondo-login.jpg');
+  /* Ajustar tamaño: 100% ancho, altura automática */
+  background-size: cover;
+  background-position: center; /* Mantener centrado */
+  background-repeat: no-repeat; /* No repetir */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px;
   text-align: center;
+  /* Añadir un overlay oscuro si el texto no se lee bien sobre la imagen */
+  position: relative; /* Necesario si usamos un pseudo-elemento para overlay */
 }
 
+/* Opcional: Overlay oscuro sobre la imagen en la columna izquierda para legibilidad del texto */
+.login-left-column::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad */
+  z-index: 1; /* Asegura que esté sobre el fondo pero debajo del contenido */
+}
+
+/* Asegurar que el contenido esté sobre el overlay */
 .left-content {
+  position: relative;
+  z-index: 2;
   max-width: 400px;
+  width: 100%;
 }
 
 .logo-placeholder {
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: bold;
-  margin-bottom: 20px;
-  /* Estilo para el logo circular como en la imagen */
-  width: 60px;
-  height: 60px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  display: inline-flex; /* Cambiado a inline-flex */
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px; /* Separación del título */
+  color: #ffd700;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 30px;
+  width: 100%;
+  text-align: center;
 }
 
 .left-content h2 {
@@ -83,7 +109,6 @@
   background-color: #1a1a1a;
   color: #ffffff;
 }
-
 
 .login-right-column {
   flex: 1;
@@ -185,48 +210,44 @@
 
 .input-group {
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .input-group label {
   display: block;
-  font-size: 0.85rem;
-  color: #a0a0a0;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
+  color: #ccc;
 }
 
 .input-group input {
   width: 100%;
-  padding: 12px 15px;
-  background-color: #2d2d2d;
-  border: 1px solid #444;
-  color: #ffffff;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  box-sizing: border-box; /* Asegura que el padding no aumente el tamaño total */
+  padding: 10px;
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: #fff;
 }
 
-.input-group input::placeholder {
-  color: #666;
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #ffd700, #f0c040);
+  border: 1px solid #DAA520; /* Borde dorado */
+  color: #222;
+  font-size: 1.1em;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.input-group input:focus {
-  outline: none;
-  border-color: #a020f0; /* Color de borde al enfocar */
-  box-shadow: 0 0 0 2px rgba(160, 32, 240, 0.3);
-}
-
-.password-hint {
-    display: block;
-    font-size: 0.75rem;
-    color: #888;
-    margin-top: 5px;
+.login-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
 }
 
 .error-message {
   color: #ff4d4d;
-  font-size: 0.85rem;
-  text-align: center;
-  margin-top: -10px;
   margin-bottom: 15px;
 }
 
@@ -345,4 +366,35 @@
         flex-direction: column;
         gap: 15px; /* Ajusta el gap si es necesario */
     }
+}
+
+/* Añadir estilo para el mensaje de validación de email */
+.email-hint, .password-hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Estilo para el mensaje de registro */
+.registration-note {
+  margin-top: 15px;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Estilos para el botón deshabilitado */
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Estilo para el mensaje de error */
+.error-message {
+  color: #e74c3c;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  text-align: center;
 } 

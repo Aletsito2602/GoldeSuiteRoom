@@ -1,0 +1,6 @@
+id,Email,Name,Card_Address_Country,Created (UTC)
+1,usuario1@example.com,Usuario Uno,ES,2025-01-01
+2,usuario2@example.com,Usuario Dos,MX,2025-01-02
+3,usuario3@example.com,Usuario Tres,CO,2025-01-03
+4,usuario4@example.com,Usuario Cuatro,AR,2025-01-04
+5,usuario5@example.com,Usuario Cinco,US,2025-01-05 

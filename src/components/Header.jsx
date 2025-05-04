@@ -20,24 +20,54 @@ function Header({ onToggleSidebar, isMobile }) {
 
   return (
     <header style={{ 
-      background: 'transparent', // Hacer transparente o un color oscuro como #2a2a2a
-      padding: '10px 20px', // Añadir padding horizontal
+      background: '#282828', 
+      padding: '10px 20px',
       display: 'flex', 
-      alignItems: 'center', // Centrar verticalmente
+      alignItems: 'center',
       justifyContent: 'space-between',
-      borderBottom: '1px solid #353535' // Borde inferior más oscuro
+      borderBottom: '1px solid #353535',
+      position: 'sticky',
+      top: 0,
+      zIndex: 200
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        {/* Renderizar botón toggle solo si NO es móvil */}
-        {!isMobile && (
-          <button onClick={onToggleSidebar} style={{ marginRight: '15px' }}>☰</button> 
-        )}
-        <span style={{ fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.87)' }}>Golden Suite Room</span> // Asegurar color claro
+        {/* Mostrar botón de menú siempre, no solo en escritorio */}
+        <button 
+          onClick={onToggleSidebar} 
+          style={{ 
+            marginRight: '15px', 
+            background: 'transparent',
+            border: 'none',
+            color: '#D7B615',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <i className="fas fa-bars"></i>
+        </button>
+        <span style={{ fontWeight: 'bold', color: 'rgba(255, 255, 255, 0.87)' }}>Mi Legado</span>
       </div>
       
       {/* Mostrar botón de Logout si hay usuario */}
       {currentUser && (
-        <button onClick={handleLogout} style={{ marginLeft: 'auto' }}>
+        <button 
+          onClick={handleLogout} 
+          style={{ 
+            marginLeft: 'auto',
+            background: 'transparent',
+            border: '1px solid #D7B615',
+            borderRadius: '5px',
+            color: '#D7B615',
+            padding: '5px 10px',
+            cursor: 'pointer',
+            fontSize: '0.9rem'
+          }}
+        >
+          <i className="fas fa-sign-out-alt" style={{ marginRight: '5px' }}></i>
           Cerrar Sesión
         </button>
       )}

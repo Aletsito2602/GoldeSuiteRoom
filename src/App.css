@@ -3,13 +3,14 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden; /* Evitar desplazamiento horizontal no deseado */
 }
 
 /* Contenedor para Sidebar y Contenido */
 .main-layout {
   display: flex;
   flex-grow: 1; /* Ocupa el espacio restante vertical */
-  /* La sidebar puede superponerse en móvil, ajustar según media query */
+  position: relative; /* Para posicionamiento absoluto del sidebar en móvil */
 }
 
 /* Estilo para el área de contenido */
@@ -17,65 +18,43 @@
   flex-grow: 1; /* Ocupa el espacio restante horizontal */
   padding: 20px; /* Añadir algo de padding */
   overflow-y: auto; /* Permitir scroll si el contenido es largo */
+  transition: margin-left 0.3s ease; /* Transición suave para ajuste al sidebar */
+  margin-left: 250px; /* Por defecto considerando el sidebar abierto */
+  width: calc(100vw - 250px); /* Ancho total menos el sidebar */
 }
 
-/* Estilos básicos para la sidebar (complementan los inline) */
-.main-layout aside.sidebar {
-  /* Los estilos base como background, color, height, etc., están inline */
-  /* Asegurar que tenga transición */
-  box-sizing: border-box; /* <<< Añadir box-sizing */
-  transition: transform 0.3s ease, width 0.3s ease, padding 0.3s ease, border-right-width 0.3s ease; /* Añadir min-width a transition */
-  overflow: hidden; /* Ocultar contenido que desborda durante la animación */
-  white-space: nowrap; /* Evitar que el texto haga wrap durante la animación */
-  padding: 20px; /* <<< Añadir padding base aquí */
-  border-right-width: 1px; /* <<< Añadir ancho de borde base aquí */
-  /* Estilos base que estaban inline */
+/* Estilos básicos para la sidebar */
+.sidebar {
   width: 250px; 
+  height: 100%;
   background: #353535; 
-  height: calc(100vh - 57px); /* Ajustar si altura header cambia */
-  border-right: 1px solid #444; 
   color: rgba(255, 255, 255, 0.8);
-  flex-shrink: 0; 
+  box-sizing: border-box;
+  overflow-y: auto;
+  z-index: 150;
+  transition: transform 0.3s ease;
 }
 
-/* Estado cerrado: se reduce el ancho y el padding */
-.main-layout aside.sidebar.closed {
-  width: 0;
-  min-width: 0; /* <<< Añadir min-width 0 */
-  padding-left: 0;
-  padding-right: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  border-right-width: 0;
-  /* Ocultar con transform en móvil */
+/* Estilos para íconos de Font Awesome en la barra lateral */
+.sidebar i {
+  width: 20px;
+  margin-right: 10px;
+  text-align: center;
 }
 
-/* Estado abierto (explícito para padding y borde si se animan) */
-.main-layout aside.sidebar.open {
-  /* Width ya está en inline style */
-  min-width: 250px; /* <<< Opcional: asegurar min-width cuando está abierto */
-  padding: 20px; /* Asegurar padding cuando está abierto */
-  border-right-width: 1px; /* Asegurar borde cuando está abierto */
+/* Estilos para las tabs en el sidebar */
+.sidebar-tab {
+  padding: 12px 15px;
+  margin: 8px 15px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Limpieza de estilos por defecto de listas en la sidebar */
-.main-layout aside ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.main-layout aside li {
-  margin-bottom: 10px;
-}
-
-.main-layout aside a {
-  text-decoration: none;
-  color: #D7B615;
-}
-
-.main-layout aside a:hover {
-  color: #007bff;
+.sidebar-tab:hover {
+  background-color: rgba(215, 182, 21, 0.1);
 }
 
 /* === LAYOUTS DE CONTENIDO (ClassDetail, Streaming) === */
@@ -85,57 +64,96 @@
 }
 .left-column { flex: 3; min-width: 0; max-width: 900px; }
 .right-column { flex: 1; min-width: 0; }
-.streaming-main { flex: 3; min-width: 0; display: flex; flex-direction: column; }
-.streaming-playlist { flex: 1; min-width: 0; display: flex; /* Para que Playlist tome altura */ }
+
+/* Ajustar proporción para Streaming */
+.streaming-main {
+  flex: 3 1 0%;
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  height: 100%;
+}
+.streaming-playlist {
+  flex: 1 1 0%;
+  min-width: 300px;
+  max-width: 450px;
+  width: 100%;
+  display: flex; 
+  flex-direction: column;
+  background: #232323;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 18px 12px 12px 12px;
+  height: 100%;
+  overflow-y: auto;
+}
 
 /* === GRIDS DE CONTENIDO (HomePage Clases) === */
 .collection-grid {
     display: flex; 
     flex-wrap: wrap; 
     margin-bottom: 30px; 
-    gap: 15px; /* Añadir gap para espaciado */
+  gap: 15px; 
+}
+
+/* Estilos para la página de perfil */
+.profile-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilos para la página Acerca */
+.about-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilo para botones de tab en HomePage */
+.tab-button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #555;
+  background-color: transparent;
+  color: #eee;
+}
+
+.tab-button.active {
+  border: 2px solid #D7B615;
+  background-color: #444;
+  color: #D7B615;
+  font-weight: bold;
 }
 
 /* === MEDIA QUERIES PARA RESPONSIVE === */
 @media (max-width: 768px) {
-  /* Reducir tamaño de fuente base para mejor densidad */
-  html { 
-    font-size: 90%; /* O ajustar :root { font-size: ... } */
-  }
-
-  .main-layout aside.sidebar {
-    position: fixed; /* Cambiar a fixed para overlay */
-    left: 0;
-    top: 0; /* O ajustar a altura del header si no se oculta */
-    height: 100%; /* Ocupar toda la altura */
-    z-index: 1000; /* Asegurar que esté por encima */
-    transform: translateX(-100%); /* Oculta fuera de pantalla */
-    transition: transform 0.3s ease; /* Animar solo transform */
-    border-right: 1px solid #555; /* Borde más visible quizás */
-    /* Quitar width/min-width/padding de la transition base */
-    /* El width siempre será 250px, solo controlamos visibilidad con transform */
-  }
-  .main-layout aside.sidebar.open {
-    transform: translateX(0); /* Mostrar en pantalla */
-    /* Anular min-width si aplica */
-    min-width: initial; 
-    /* Asegurar padding/border */
-    padding: 20px;
-    border-right-width: 1px;
-  }
-  .main-layout aside.sidebar.closed {
-      /* No necesita width/padding 0, solo transform */
-      transform: translateX(-100%);
-      /* Asegurar que no tenga borde visible al estar cerrado */
-      border-right-width: 0;
-      padding: 0;
-  }
-
-  /* Hacer que el content-area ocupe todo y ajustar padding */
+  /* Ajustes para el área de contenido cuando el sidebar está activo */
   .content-area {
-    padding: 10px; /* <<< Reducir padding general */
-    /* Añadir un poco de padding inferior extra */
-    padding-bottom: 60px; 
+    margin-left: 0; /* Sin margen para el sidebar en móvil */
+    width: 100%; /* Ancho completo en móvil */
+    padding: 15px; /* Reducir padding */
+    transition: none; /* No necesitamos transición en móvil */
+  }
+
+  /* En dispositivos móviles, el sidebar se posiciona como una capa sobre el contenido */
+  .sidebar {
+    position: fixed;
+    top: 57px; /* Altura del header */
+    left: 0;
+    height: calc(100vh - 57px);
+    transform: translateX(-100%); /* Oculto por defecto */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2); /* Sombra para mejor visibilidad */
+  }
+
+  /* Cuando el sidebar está abierto */
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Ajustes adicionales para mejorar la experiencia móvil */
+  html { 
+    font-size: 90%; 
   }
 
   /* Apilar columnas */
@@ -143,7 +161,7 @@
     flex-direction: column;
   }
   
-  /* Ajustar ancho máximo en móvil si es necesario */
+  /* Ajustar ancho máximo en móvil */
   .left-column {
     max-width: 100%; 
   }
@@ -153,85 +171,95 @@
     justify-content: center; /* Centrar items */
   }
 
-  /* Ajustar header padding */
+  /* Ajustar header */
   header { 
-      padding: 8px 15px; /* <<< Reducir padding */
+    padding: 8px 15px; 
   }
   
-  /* Ajustar tamaño de botones generales */
+  /* Ajustar tamaño de botones */
   button {
-      padding: 0.5em 1em; /* Un poco más pequeños */
+    padding: 0.5em 1em; 
       font-size: 0.9em;
   }
   
-  /* Ajustar títulos principales de página/sección */
-  h1 {
-      font-size: 2em; /* Reducir H1 */
-  }
-  h2 {
-      font-size: 1.5em;
-  }
-  h3 {
-      font-size: 1.2em;
-      margin-bottom: 10px;
-  }
+  /* Ajustar títulos */
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.5em; }
+  h3 { font-size: 1.2em; margin-bottom: 10px; }
 
-  /* === Optimizaciones Tarjetas === */
-  
-  /* PostCard y otras tarjetas similares */
-  .feed .post-card, /* Asumiendo que PostCard tiene (o le añadimos) la clase post-card */
-  .content-area .video-item-wrapper, /* Para galerías si se usa ese wrapper */
-  .comments-list .comment-item /* Podríamos aplicar a comentarios también */
-  {
-     padding: 10px; /* Menos padding interno */
+  /* Tarjetas optimizadas para móvil */
+  .feed .post-card, 
+  .content-area .video-item-wrapper, 
+  .comments-list .comment-item {
+    padding: 10px; 
   }
 
   .feed .post-card .post-header,
-  .comments-list .comment-item .comment-header /* Ejemplo si se usa */
-  {
-      /* Reducir tamaño avatar y margen */
-      .avatar { /* Si se usa clase .avatar */
+  .comments-list .comment-item .comment-header {
+    .avatar { 
           width: 35px;
           height: 35px;
           margin-right: 8px;
       }
-      /* Ajustar tamaño fuente nombre/info */
       .author-name { font-size: 0.9em; }
       .author-info { font-size: 0.8em; }
   }
 
-  /* ClassCard (la que tiene thumbnail + contenido) */
+  /* ClassCard para móvil */
   .class-card {
-      flex-direction: column; /* Apilar imagen y contenido */
+    flex-direction: column; 
   }
   .class-card .thumbnail-container {
-      width: 100%; /* Imagen ocupa todo el ancho */
-      /* Ajustar aspect ratio si es necesario para móvil */
-      /* padding-top: 56.25%; */
+    width: 100%; 
   }
   .class-card .class-content {
-      padding: 10px; /* Ajustar padding contenido */
+    padding: 10px; 
   }
   .class-card .class-title { font-size: 1em; }
   .class-card .class-duration { font-size: 0.8em; }
-  .class-card .progress-text { font-size: 0.75em; }
+  .class-card .class-progress-text { font-size: 0.75em; }
   .class-card .download-icon { font-size: 1em; padding: 4px; }
 }
 
-/* <<< Media Query Adicional para pantallas MUY pequeñas (opcional) >>> */
+/* Para pantallas más pequeñas */
 @media (max-width: 480px) {
     html {
         font-size: 85%;
     }
     .content-area {
-        padding: 8px;
-        padding-bottom: 50px;
+    padding: 10px;
+    padding-bottom: 40px;
     }
     button {
       padding: 0.4em 0.8em; 
       font-size: 0.85em;
     }
-    /* Ajustes más específicos si son necesarios */
+  .feed .post-card, .content-area .video-item-wrapper {
+    padding: 8px;
+  }
+  
+  /* Ajustar tabs en móvil pequeño */
+  .tabs-container {
+    gap: 8px !important;
+  }
+  .tab-button {
+    padding: 6px 12px !important;
+    font-size: 0.85em !important;
+  }
 }
 
-/* === OTROS ESTILOS BASE (botones, etc de index.css pueden moverse aquí) === */
+/* Añadir estilos para Font Awesome */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+@media (max-width: 900px) {
+  .streaming-layout {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .streaming-main, .streaming-playlist {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+}

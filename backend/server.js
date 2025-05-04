@@ -41,14 +41,21 @@ async function fetchVimeoAPI(url, accessToken) {
 app.get('/api/vimeo/folder-videos', async (req, res) => {
   const accessToken = process.env.VIMEO_ACCESS_TOKEN;
   const userId = process.env.VIMEO_USER_ID;
-  const folderId = process.env.VIMEO_FOLDER_ID;
+  
+  // <<< Obtener folderId de la query o de .env como fallback
+  const requestedFolderId = req.query.folderId;
+  const fallbackFolderId = process.env.VIMEO_FOLDER_ID;
+  const folderId = requestedFolderId || fallbackFolderId;
+
+  console.log(`Backend: Obteniendo videos para la carpeta ID: ${folderId}`); // Log del ID usado
 
   if (!accessToken || !userId || !folderId) {
-    return res.status(500).json({ message: 'Error de configuración: Faltan variables de entorno de Vimeo.' });
+    return res.status(500).json({ message: 'Error de configuración: Faltan variables de entorno de Vimeo o folderId.' });
   }
 
   let allVideos = [];
-  let nextUrl = `https://api.vimeo.com/users/${userId}/folders/${folderId}/videos?fields=uri,name,description,duration,pictures,stats,link&per_page=50`; // Pedir 50 por página
+  // Usar el folderId determinado en la URL
+  let nextUrl = `https://api.vimeo.com/users/${userId}/folders/${folderId}/videos?fields=uri,name,description,duration,pictures,stats,link&per_page=50`;
   
   console.log("Backend: Iniciando obtención de videos de carpeta con paginación...");
 
@@ -69,8 +76,8 @@ app.get('/api/vimeo/folder-videos', async (req, res) => {
       }
     }
     
-    console.log(`Backend: Total de videos obtenidos: ${allVideos.length}`);
-    res.json(allVideos); // Devolver el array completo de videos
+    console.log(`Backend: Total de videos obtenidos de carpeta ${folderId}: ${allVideos.length}`);
+    res.json(allVideos);
 
   } catch (error) {
     console.error('Error en el servidor al obtener videos de carpeta:', error);

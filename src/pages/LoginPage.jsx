@@ -1,8 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { validateClientEmail } from '../utils/clientValidation';
 import './LoginPage.css'; // Corregir ruta a relativa
 
 const LoginPage = () => {
@@ -12,52 +14,66 @@ const LoginPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  // Ya no necesitamos setUser aquí, AuthContext lo maneja
-  // const authContext = useAuth();
-  // const setUser = authContext.setUser;
+  const { login, syncUserWithFirestore } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Ya no es necesario llamar a setUser manualmente aquí
+      await login(email, password);
       navigate('/'); // Redirigir a home después del login (AuthContext se encargará del estado)
     } catch (err) {
-      setError(err.message);
-      console.error("Failed to log in", err);
-      // More specific error handling
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError('Correo electrónico o contraseña incorrectos.');
-      } else {
-        setError('Error al iniciar sesión. Por favor, inténtalo de nuevo.');
-      }
+      setError('Error al iniciar sesión. Verifica tus credenciales.');
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+    
     if (password.length < 8) {
         setError('La contraseña debe tener al menos 8 caracteres.');
+        setLoading(false);
         return;
     }
     if (!firstName || !lastName) {
         setError('Nombre y Apellido son requeridos.');
+        setLoading(false);
         return;
     }
+    
     try {
+      // Primero validamos si el email está en la lista de clientes autorizados
+      const { isValid, clientInfo } = await validateClientEmail(email);
+      
+      if (!isValid) {
+        setError('No encontramos tu correo en nuestra lista de clientes. Si has adquirido Mi Legado, por favor contacta a soporte.');
+        setLoading(false);
+        return;
+      }
+      
+      // Si el cliente está autorizado, procedemos con el registro
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, {
+      const user = userCredential.user;
+      
+      // Actualizar el perfil del usuario con nombre y apellido
+      await updateProfile(user, {
         displayName: `${firstName} ${lastName}`
       });
 
-      // Ya no es necesario llamar a setUser manualmente aquí
-      // AuthContext se actualizará automáticamente via onAuthStateChanged
+      // Guardar datos adicionales del cliente en Firestore
+      await syncUserWithFirestore(user, clientInfo);
 
-      setIsLoginMode(true); // Cambiar a modo login después del registro exitoso
+      setIsLoginMode(true);
       alert('¡Registro exitoso! Por favor, inicia sesión.');
+      
       // Limpiar campos después del registro
       setFirstName('');
       setLastName('');
@@ -65,13 +81,14 @@ const LoginPage = () => {
       setPassword('');
 
     } catch (err) {
-      setError(err.message);
       console.error("Failed to sign up", err);
       if (err.code === 'auth/email-already-in-use') {
         setError('Este correo electrónico ya está en uso.');
       } else {
         setError('Error al registrarse. Por favor, inténtalo de nuevo.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,9 +108,10 @@ const LoginPage = () => {
       <div className="login-left-column">
          {/* Podrías añadir aquí el logo o texto como en la imagen */}
          <div className="left-content">
-             <div className="logo-placeholder">GSR</div> {/* Placeholder para Logo */}
-             <h2>Comienza con Nosotros</h2>
-             <p>Completa estos sencillos pasos para unirte a nuestra comunidad.</p>
+             <div className="logo-placeholder">MI LEGADO</div> {/* Logo */}
+             {/* Eliminado h2 y p */}
+             {/* <h2>Comienza con Nosotros</h2> */}
+             {/* <p>Completa estos sencillos pasos para unirte a nuestra comunidad.</p> */}
              {/* Placeholder para los steps, podrías hacerlos interactivos */}
              <div className="steps-placeholder">
                  <div className={`step ${!isLoginMode ? 'active' : ''}`}><span>1</span> Crea tu cuenta</div>
@@ -114,12 +132,14 @@ const LoginPage = () => {
             <button
               className={`toggle-form-button ${isLoginMode ? 'active' : ''}`}
               onClick={() => { setIsLoginMode(true); setError(''); /* Limpiar campos opcional */ }}
+              disabled={loading}
             >
               Iniciar Sesión
             </button>
             <button
               className={`toggle-form-button ${!isLoginMode ? 'active' : ''}`}
               onClick={() => { setIsLoginMode(false); setError(''); /* Limpiar campos opcional */ }}
+              disabled={loading}
             >
               Regístrate
             </button>
@@ -142,6 +162,7 @@ const LoginPage = () => {
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Ej. Juan"
                     required={!isLoginMode}
+                    disabled={loading}
                   />
                 </div>
                 <div className="input-group">
@@ -153,6 +174,7 @@ const LoginPage = () => {
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Ej. Pérez"
                     required={!isLoginMode}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -166,7 +188,13 @@ const LoginPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ej. juan.perez@correo.com"
                 required
+                disabled={loading}
               />
+              {!isLoginMode && (
+                <small className="email-hint">
+                  Debe ser el mismo correo con el que adquirió Mi Legado.
+                </small>
+              )}
             </div>
             <div className="input-group">
               <label htmlFor="password">Contraseña</label>
@@ -177,15 +205,23 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={isLoginMode ? 'Ingresa tu contraseña' : 'Crea una contraseña'}
                 required
+                disabled={loading}
               />
                {!isLoginMode && <small className="password-hint">Debe tener al menos 8 caracteres.</small>}
             </div>
 
             {error && <p className="error-message">{error}</p>}
 
-            <button type="submit" className="submit-button">
-              {isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta'}
+            <button type="submit" className="submit-button" disabled={loading}>
+              {loading ? 'Procesando...' : (isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta')}
             </button>
+
+            {!isLoginMode && (
+              <p className="registration-note">
+                Solo usuarios que hayan adquirido Mi Legado pueden registrarse. 
+                Si tienes problemas, contacta a soporte.
+              </p>
+            )}
           </form>
 
           {/* Ya no necesitamos el toggle-mode de texto si usamos los botones superiores */}

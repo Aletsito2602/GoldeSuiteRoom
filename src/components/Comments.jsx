@@ -9,6 +9,7 @@ function Comments({ postId }) {
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [errorComments, setErrorComments] = useState(null);
+  const [indexBuilding, setIndexBuilding] = useState(false); // Estado para índice en construcción
   const [newComment, setNewComment] = useState(''); // Estado para el input
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,6 +19,7 @@ function Comments({ postId }) {
 
     setLoadingComments(true);
     setErrorComments(null);
+    setIndexBuilding(false);
 
     const commentsRef = collection(db, "comments");
     // Crear query: comentarios para este postId, ordenados por fecha
@@ -33,7 +35,15 @@ function Comments({ postId }) {
       setLoadingComments(false);
     }, (error) => { // Manejo de error del listener
       console.error("Error listening to comments: ", error);
-      setErrorComments("No se pudieron cargar los comentarios.");
+      
+      // Verificar si el error es de índice en construcción
+      if (error.message && error.message.includes("index")) {
+        setIndexBuilding(true);
+        setErrorComments("Los comentarios están siendo preparados. Por favor, espera unos minutos.");
+      } else {
+        setErrorComments("No se pudieron cargar los comentarios.");
+      }
+      
       setLoadingComments(false);
     });
 
@@ -154,13 +164,29 @@ function Comments({ postId }) {
     alignSelf: 'flex-end' // Alinear con la parte inferior del textarea
   };
 
+  const indexBuildingStyle = {
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    border: '1px solid rgba(255, 165, 0, 0.5)',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '15px',
+    color: 'rgba(255, 165, 0, 0.9)'
+  };
+
   return (
     <div style={containerStyle}>
       <div style={titleStyle}>Comentarios ({comments.length})</div>
       
+      {indexBuilding && (
+        <div style={indexBuildingStyle}>
+          <p>⚠️ Estamos preparando el sistema de comentarios. Esta operación puede tardar unos minutos.</p>
+          <p>Por favor, vuelve a intentarlo más tarde.</p>
+        </div>
+      )}
+      
       <div style={commentListStyle}>
         {loadingComments && <p>Cargando comentarios...</p>}
-        {errorComments && <p style={{ color: 'red' }}>{errorComments}</p>}
+        {errorComments && !indexBuilding && <p style={{ color: 'red' }}>{errorComments}</p>}
         {!loadingComments && !errorComments && comments.length === 0 && <p style={{color: 'rgba(255,255,255,0.6)'}}>Sé el primero en comentar.</p>}
         {!loadingComments && !errorComments && comments.map(comment => (
           <div key={comment.id} style={commentItemStyle}>
@@ -183,10 +209,10 @@ function Comments({ postId }) {
           placeholder={currentUser ? "Escribe tu comentario..." : "Inicia sesión para comentar"}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          disabled={!currentUser || isSubmitting} // Deshabilitar si no logueado o enviando
+          disabled={!currentUser || isSubmitting || indexBuilding} // Deshabilitar si no logueado, enviando o índice en construcción
           style={textareaStyle}
         />
-        <button type="submit" disabled={!currentUser || !newComment.trim() || isSubmitting} style={buttonStyle}>
+        <button type="submit" disabled={!currentUser || !newComment.trim() || isSubmitting || indexBuilding} style={buttonStyle}>
           {isSubmitting ? 'Enviando...' : 'Enviar'}
         </button>
       </form>

@@ -1,7 +1,7 @@
 import React from 'react';
 import PlaylistItem from './PlaylistItem'; // Importar el item individual
 
-function Playlist({ items, title = "Live grabados" }) { // Título por defecto
+function Playlist({ items, title = "Live grabados", onSelectVideo }) { // Título por defecto
   const containerStyle = {
     backgroundColor: '#353535',
     borderRadius: '8px',
@@ -27,7 +27,7 @@ function Playlist({ items, title = "Live grabados" }) { // Título por defecto
       <div style={titleStyle}>{title}</div>
       <div style={{ flexGrow: 1 }}> {/* Contenedor para los items que permita scroll */} 
         {items.map((item, index) => (
-          <PlaylistItem key={item.id || index} item={item} />
+          <PlaylistItem key={item.id || index} item={item} onClick={() => onSelectVideo && onSelectVideo(item)} />
         ))}
       </div>
     </div>

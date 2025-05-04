@@ -1,45 +1,71 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext'; // Para obtener info del usuario
 
-function PostInput({ onPostSubmit, isSubmitting }) {
+function PostInput({ onSubmitPost, isSubmitting, selectedCategory }) {
   const { currentUser } = useAuth(); // Obtener usuario actual
   const [postContent, setPostContent] = useState(''); // <<< Estado para el input
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!postContent.trim() || !currentUser) return; // No enviar si vacío o no logueado
-    onPostSubmit(postContent); // <<< Llamar a la función del padre
+    onSubmitPost(postContent); // Llamar a la función del padre con el contenido correcto
     setPostContent(''); // Limpiar input después de enviar
-  };
-
-  const inputStyle = {
-    backgroundColor: '#353535', // Fondo oscuro para el input
-    border: '1px solid #444',
-    borderRadius: '20px', // Bordes redondeados
-    padding: '10px 15px',
-    color: 'rgba(255, 255, 255, 0.7)',
-    width: '100%', // Ocupar ancho disponible
-    marginLeft: '10px' // Espacio después del avatar
   };
 
   const containerStyle = {
     display: 'flex',
-    alignItems: 'flex-start', // Alinear al inicio para el botón
+    alignItems: 'flex-start',
     padding: '15px 0',
     marginBottom: '20px',
-    borderBottom: '1px solid #353535'
+    borderBottom: '1px solid #353535',
+    gap: '12px' // Añadir espacio entre elementos
+  };
+
+  const inputStyle = {
+    backgroundColor: '#353535',
+    border: '1px solid #444',
+    borderRadius: '20px',
+    padding: '12px 15px',
+    color: 'rgba(255, 255, 255, 0.7)',
+    width: '100%'
   };
 
   const avatarStyle = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%'
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    backgroundColor: '#444',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#D7B615',
+    fontWeight: 'bold',
+    fontSize: '1.5rem',
+    border: '2px solid #555',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
   };
 
   // <<< Estilo para el botón de publicar >>>
   const buttonStyle = {
-      marginLeft: '10px',
-      alignSelf: 'flex-end' // Alinear con el input
+    marginLeft: '10px',
+    alignSelf: 'flex-end',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    backgroundColor: '#D7B615',
+    color: '#222',
+    border: 'none',
+    fontWeight: 'bold',
+    cursor: postContent.trim() && !isSubmitting ? 'pointer' : 'not-allowed',
+    opacity: postContent.trim() && !isSubmitting ? 1 : 0.7
+  };
+
+  // Mostrar la categoría seleccionada junto al input
+  const categoryStyle = {
+    fontSize: '0.8rem',
+    color: selectedCategory === 'Anuncios' ? '#FF9800' : '#D7B615',
+    marginLeft: '50px',
+    marginBottom: '5px'
   };
 
   // Si no hay usuario, mostrar un mensaje o deshabilitar
@@ -53,35 +79,51 @@ function PostInput({ onPostSubmit, isSubmitting }) {
     );
   }
 
+  // Obtener la primera letra del nombre si existe
+  const getUserInitial = () => {
+    if (currentUser.displayName && currentUser.displayName.trim() !== '') {
+      return currentUser.displayName.trim()[0].toUpperCase();
+    }
+    return currentUser.email ? currentUser.email[0].toUpperCase() : 'U';
+  };
+
   return (
-    // <<< Usar form para el submit >>>
-    <form onSubmit={handleSubmit} style={containerStyle}>
-      <img 
-        src={currentUser.photoURL || 'https://placehold.co/40x40/777/FFF?text=U'} // Usar avatar de Firebase si existe
-        alt="User Avatar" 
-        style={avatarStyle} 
-      />
-      <textarea // <<< Cambiar input a textarea para multi-línea
-        placeholder="¿Qué estás pensando?" 
-        value={postContent}
-        onChange={(e) => setPostContent(e.target.value)}
-        rows={3} // Ajustar filas según necesidad
-        style={{...inputStyle, marginLeft: '10px'}} // Reaplicar estilo de input
-        disabled={isSubmitting}
-      />
-      {/* Quitar iconos placeholder de búsqueda/filtro */}
-      {/* <span style={{ ... }}>🔍</span> */}
-      {/* <span style={{ ... }}>👤</span> */}
-      
-      {/* <<< Botón de Publicar >>> */}
-      <button 
-        type="submit" 
-        style={buttonStyle} 
-        disabled={!postContent.trim() || isSubmitting}
-      >
-        {isSubmitting ? 'Publicando...' : 'Publicar'}
-      </button>
-    </form>
+    <div>
+      {selectedCategory && (
+        <div style={categoryStyle}>
+          Publicando en: {selectedCategory}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} style={containerStyle}>
+        {currentUser.photoURL ? (
+          <img 
+            src={currentUser.photoURL} 
+            alt="User Avatar" 
+            style={avatarStyle} 
+          />
+        ) : (
+          <div style={avatarStyle}>
+            {getUserInitial()}
+          </div>
+        )}
+        <textarea
+          placeholder={selectedCategory === 'Anuncios' ? "Escribe un anuncio importante..." : "¿Qué estás pensando?"} 
+          value={postContent}
+          onChange={(e) => setPostContent(e.target.value)}
+          rows={3}
+          style={inputStyle}
+          disabled={isSubmitting}
+        />
+        
+        <button 
+          type="submit" 
+          style={buttonStyle}
+          disabled={!postContent.trim() || isSubmitting}
+        >
+          {isSubmitting ? 'Publicando...' : selectedCategory === 'Anuncios' ? 'Publicar Anuncio' : 'Publicar'}
+        </button>
+      </form>
+    </div>
   );
 }
 

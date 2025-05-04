@@ -1,6 +1,6 @@
 import React from 'react';
 
-function PlaylistItem({ item }) {
+function PlaylistItem({ item, onClick }) {
   const itemStyle = {
     display: 'flex',
     marginBottom: '15px',
@@ -43,7 +43,7 @@ function PlaylistItem({ item }) {
   };
 
   return (
-    <div style={itemStyle}>
+    <div style={itemStyle} onClick={onClick}>
       <div style={{ position: 'relative' }}>
         <img 
           src={item.thumbnailUrl || 'https://placehold.co/100x60/555/ccc?text=Vid'} 

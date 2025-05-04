@@ -1,9 +1,7 @@
 import React from 'react';
 
-// Componente que ahora renderiza el embed de Vimeo
-function VideoPlayer() { 
-  // Ya no necesitamos el playerStyle anterior
-
+// Componente que ahora renderiza el embed de Vimeo o un video seleccionado
+function VideoPlayer({ video }) {
   // Estilos para el contenedor que mantiene el aspect ratio 16:9
   const containerStyle = {
     padding: '56.25% 0 0 0', // Padding-top para 16:9 (9 / 16 * 100)
@@ -23,6 +21,25 @@ function VideoPlayer() {
     border: 'none' // Asegurarse que el iframe no tenga borde propio
   };
 
+  // Si hay un video seleccionado, mostrar ese video (Vimeo)
+  if (video && video.id) {
+    // Suponiendo que video.id es el ID de Vimeo
+    const vimeoUrl = `https://player.vimeo.com/video/${video.id}`;
+    return (
+      <div style={containerStyle}>
+        <iframe 
+          src={vimeoUrl}
+          frameBorder="0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          style={iframeStyle}
+          title={video.title || 'Video grabado'}
+        ></iframe>
+      </div>
+    );
+  }
+
+  // Si no, mostrar el embed de streaming principal
   return (
     <div style={containerStyle}>
       <iframe 
@@ -31,7 +48,7 @@ function VideoPlayer() {
         allow="autoplay; fullscreen; picture-in-picture" 
         allowFullScreen 
         style={iframeStyle}
-        title="Vimeo Livestream" // Añadir título para accesibilidad
+        title="Vimeo Livestream"
       ></iframe>
     </div>
   );
