@@ -2,146 +2,98 @@ import express from 'express';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Cargar variables de entorno desde .env
-dotenv.config({ path: 'backend/.env' });
+// Configuración de rutas para ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cargar variables de entorno
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Habilitar CORS para permitir peticiones desde el frontend (Vite corre en otro puerto)
-app.use(cors()); 
+// Configuración de CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Middleware para parsear JSON (aunque no lo usemos ahora, es útil)
+// Middleware para parsear JSON
 app.use(express.json());
 
-// Helper function para hacer la llamada a Vimeo API
-async function fetchVimeoAPI(url, accessToken) {
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/vnd.vimeo.*+json;version=3.4'
-    }
-  });
-  if (!response.ok) {
-    // Manejo de errores mejorado como hicimos para el endpoint de video único
-    if (response.status === 404) {
-        throw new Error('Recurso no encontrado en Vimeo (404)');
-    } else if (response.status === 403) {
-        throw new Error('Acceso prohibido por Vimeo (403) - Verifica permisos del token');
-    }
-    let errorBody = 'Error desconocido';
-    try { errorBody = await response.text(); } catch (e) { /* ignore */ }
-    throw new Error(`Error de Vimeo (${response.status}): ${errorBody}`);
-  }
-  return await response.json();
-}
-
-// Endpoint para obtener TODOS los videos de una carpeta específica (con paginación)
-app.get('/api/vimeo/folder-videos', async (req, res) => {
-  const accessToken = process.env.VIMEO_ACCESS_TOKEN;
-  const userId = process.env.VIMEO_USER_ID;
-  
-  // <<< Obtener folderId de la query o de .env como fallback
-  const requestedFolderId = req.query.folderId;
-  const fallbackFolderId = process.env.VIMEO_FOLDER_ID;
-  const folderId = requestedFolderId || fallbackFolderId;
-
-  console.log(`Backend: Obteniendo videos para la carpeta ID: ${folderId}`); // Log del ID usado
-
-  if (!accessToken || !userId || !folderId) {
-    return res.status(500).json({ message: 'Error de configuración: Faltan variables de entorno de Vimeo o folderId.' });
-  }
-
-  let allVideos = [];
-  // Usar el folderId determinado en la URL
-  let nextUrl = `https://api.vimeo.com/users/${userId}/folders/${folderId}/videos?fields=uri,name,description,duration,pictures,stats,link&per_page=50`;
-  
-  console.log("Backend: Iniciando obtención de videos de carpeta con paginación...");
-
-  try {
-    while (nextUrl) {
-      console.log(`Backend: Obteniendo página: ${nextUrl}`);
-      const data = await fetchVimeoAPI(nextUrl, accessToken);
-      
-      if (data && data.data) {
-          allVideos = allVideos.concat(data.data);
-      }
-      
-      // Verificar si hay una página siguiente
-      if (data.paging && data.paging.next) {
-        nextUrl = `https://api.vimeo.com${data.paging.next}`; // Construir URL completa para la siguiente página
-      } else {
-        nextUrl = null; // No hay más páginas
-      }
-    }
-    
-    console.log(`Backend: Total de videos obtenidos de carpeta ${folderId}: ${allVideos.length}`);
-    res.json(allVideos);
-
-  } catch (error) {
-    console.error('Error en el servidor al obtener videos de carpeta:', error);
-    // Enviar un error más específico si es posible
-    const status = error.message.includes('404') ? 404 : error.message.includes('403') ? 403 : 500;
-    res.status(status).json({ message: error.message || 'Error interno del servidor' });
-  }
+// Middleware para logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
 });
 
-// Endpoint para obtener detalles de un video específico
-app.get('/api/vimeo/video/:videoId', async (req, res) => {
-  const accessToken = process.env.VIMEO_ACCESS_TOKEN;
-  const videoId = req.params.videoId;
-  
-  // <<< Log para depuración
-  console.log(`Backend: Intentando obtener detalles para video ID: ${videoId}`); 
-
-  if (!accessToken) {
-    return res.status(500).json({ message: 'Error de configuración: Falta token de acceso de Vimeo.' });
-  }
-  if (!videoId) {
-    return res.status(400).json({ message: 'Falta el ID del video.' });
-  }
-
-  // Quitar embed.html de los fields solicitados
-  const url = `https://api.vimeo.com/videos/${videoId}?fields=uri,name,description,duration,pictures.base_link,stats,link,user.name`;
-
+// Helper function para llamadas a Vimeo API
+async function fetchVimeoAPI(url, accessToken) {
   try {
-    const vimeoResponse = await fetch(url, {
+    const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Accept': 'application/vnd.vimeo.*+json;version=3.4'
       }
     });
 
-    if (!vimeoResponse.ok) {
-      if (vimeoResponse.status === 404) {
-        console.error(`Video ${videoId} not found on Vimeo.`);
-        return res.status(404).json({ message: 'Video no encontrado en Vimeo (404 desde Vimeo)' });
-      }
-      
-      let errorBody = null;
-      try {
-        errorBody = await vimeoResponse.text();
-      } catch (parseError) {
-        console.error('Could not parse error body from Vimeo');
-      }
-      console.error(`Error fetching video ${videoId} from Vimeo. Status: ${vimeoResponse.status}`, errorBody);
-      return res.status(vimeoResponse.status).json({ 
-        message: `Error al obtener detalles del video de Vimeo (Status: ${vimeoResponse.status})`,
-        error: errorBody 
-      });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Error de Vimeo (${response.status})`);
     }
 
-    const data = await vimeoResponse.json();
-    res.json(data); // Devolver el objeto completo del video
-
+    return await response.json();
   } catch (error) {
-    console.error('Error en el servidor:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error('Error en fetchVimeoAPI:', error);
+    throw error;
+  }
+}
+
+// Endpoint para obtener videos de una carpeta
+app.get('/api/vimeo/folder-videos', async (req, res) => {
+  try {
+    const accessToken = process.env.VIMEO_ACCESS_TOKEN;
+    const userId = process.env.VIMEO_USER_ID;
+    const folderId = req.query.folderId || process.env.VIMEO_FOLDER_ID;
+
+    if (!accessToken || !userId || !folderId) {
+      throw new Error('Configuración incompleta: Verifica las variables de entorno');
+    }
+
+    const url = `https://api.vimeo.com/users/${userId}/folders/${folderId}/videos`;
+    const data = await fetchVimeoAPI(url, accessToken);
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error en /api/vimeo/folder-videos:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Iniciar el servidor
+// Endpoint de salud
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  console.error('Error global:', err);
+  res.status(500).json({
+    error: 'Error interno del servidor',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal'
+  });
+});
+
+// Iniciar servidor
 app.listen(port, () => {
-  console.log(`Servidor backend escuchando en http://localhost:${port}`);
+  console.log(`Servidor backend corriendo en http://localhost:${port}`);
+  console.log('Variables de entorno cargadas:', {
+    PORT: process.env.PORT,
+    VIMEO_USER_ID: process.env.VIMEO_USER_ID ? '***' : 'No configurado',
+    VIMEO_FOLDER_ID: process.env.VIMEO_FOLDER_ID ? '***' : 'No configurado'
+  });
 }); 

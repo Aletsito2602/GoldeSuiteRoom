@@ -25,26 +25,11 @@ const FirebaseInitializer = ({ children }) => {
       }
     };
 
-    initializeFirebase();
+    // Retrasar la inicialización para asegurar que el DOM esté listo
+    setTimeout(initializeFirebase, 100);
   }, []);
 
-  if (!initialized) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        backgroundColor: '#f5f5f5'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <h2>Cargando la aplicación...</h2>
-          <p>Por favor espere mientras se inicializa Firebase</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Si hay un error, mostrar mensaje de error
   if (error) {
     return (
       <div style={{ 
@@ -52,18 +37,51 @@ const FirebaseInitializer = ({ children }) => {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh',
-        backgroundColor: '#f5f5f5'
+        backgroundColor: '#f5f5f5',
+        padding: '20px',
+        textAlign: 'center'
       }}>
-        <div style={{ textAlign: 'center', color: 'red' }}>
-          <h2>Error de inicialización</h2>
-          <p>{error}</p>
-          <p>La aplicación puede funcionar con funcionalidad limitada</p>
+        <div>
+          <h2 style={{ color: '#e74c3c' }}>Error de inicialización</h2>
+          <p style={{ color: '#333' }}>{error}</p>
+          <p style={{ color: '#666' }}>La aplicación puede funcionar con funcionalidad limitada</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
+  // Si no está inicializado, mostrar pantalla de carga
+  if (!initialized) {
+    return null; // Dejar que el HTML inicial maneje la pantalla de carga
+  }
+
+  // Si todo está bien, renderizar la aplicación
   return children;
+};
+
+// Función para manejar errores no capturados
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error('Error no capturado:', { message, source, lineno, colno, error });
+  return true;
+};
+
+// Función para manejar promesas no manejadas
+window.onunhandledrejection = function(event) {
+  console.error('Promesa no manejada:', event.reason);
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(
