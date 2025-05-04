@@ -13,6 +13,11 @@ export const setupFirestore = async () => {
   console.log('=== Iniciando configuración de Firestore ===');
   
   try {
+    // Verificar conexión con Firestore
+    const testDoc = doc(db, 'test', 'connection');
+    await setDoc(testDoc, { timestamp: serverTimestamp() });
+    console.log('Conexión con Firestore establecida correctamente');
+
     // 1. Verificar/Crear colección de usuarios
     await setupCollection('users');
     
@@ -29,6 +34,11 @@ export const setupFirestore = async () => {
     return true;
   } catch (error) {
     console.error('Error durante la configuración de Firestore:', error);
+    if (error.code === 'permission-denied') {
+      console.error('Error de permisos: Verifica las reglas de Firestore');
+    } else if (error.code === 'unavailable') {
+      console.error('Error de conexión: Verifica tu conexión a internet');
+    }
     return false;
   }
 };
@@ -49,10 +59,8 @@ const setupCollection = async (collectionName) => {
       
       // Crear documento de configuración para inicializar la colección
       await setDoc(setupDocRef, {
-        createdAt: serverTimestamp(),
-        initialized: true,
-        collectionName: collectionName,
-        description: `Colección de ${collectionName} inicializada automáticamente`
+        created_at: serverTimestamp(),
+        purpose: 'Documento de inicialización'
       });
       
       console.log(`Colección ${collectionName} inicializada con éxito`);
@@ -62,7 +70,7 @@ const setupCollection = async (collectionName) => {
     
     return true;
   } catch (error) {
-    console.error(`Error al configurar colección ${collectionName}:`, error);
+    console.error(`Error al configurar la colección ${collectionName}:`, error);
     throw error;
   }
 };
@@ -72,22 +80,16 @@ const setupCollection = async (collectionName) => {
  */
 const createConfigDocument = async () => {
   try {
-    const configRef = doc(db, 'app_config', 'main');
+    const configRef = doc(db, 'config', 'app_config');
     const configDoc = await getDoc(configRef);
     
     if (!configDoc.exists()) {
       console.log('Creando documento de configuración principal');
       
       await setDoc(configRef, {
-        appName: 'Golden Suite Room',
-        version: '1.0.0',
-        lastSetup: serverTimestamp(),
-        collections: ['users', 'posts', 'admin_logs'],
-        features: {
-          userProfiles: true,
-          adminRoles: true,
-          announcements: true
-        }
+        created_at: serverTimestamp(),
+        last_updated: serverTimestamp(),
+        version: '1.0.0'
       });
       
       console.log('Documento de configuración creado exitosamente');
@@ -95,7 +97,7 @@ const createConfigDocument = async () => {
       console.log('Actualizando documento de configuración existente');
       
       await setDoc(configRef, {
-        lastSetup: serverTimestamp(),
+        last_updated: serverTimestamp(),
         updated: true
       }, { merge: true });
       

@@ -9,13 +9,18 @@ import { getStorage } from "firebase/storage"; // Importar Storage para las imá
 // Your web app's Firebase configuration
 // WARNING: Consider using environment variables for sensitive data like apiKey in production
 const firebaseConfig = {
-  apiKey: "AIzaSyBThM4WK6VNGYnbP8wPU3YLEbaLNQLSGBY",
-  authDomain: "golden-suite-room-vgdl8z.firebaseapp.com",
-  projectId: "golden-suite-room-vgdl8z",
-  storageBucket: "golden-suite-room-vgdl8z.appspot.com",
-  messagingSenderId: "202589345627",
-  appId: "1:202589345627:web:90a8143703cf1178c22c7e"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+
+console.log('Inicializando Firebase con configuración:', {
+  ...firebaseConfig,
+  apiKey: '***' // No mostrar la API key en los logs
+});
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
